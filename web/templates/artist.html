@@ -1,0 +1,72 @@
+{{template "base" .}}
+
+{{define "title"}}{{.Artist.Name}} · Groupie Tracker{{end}}
+
+{{define "content"}}
+
+<a href="/" class="back-link">← Back to all artists</a>
+
+<div class="artist-detail">
+
+    <div class="artist-hero">
+        <img src="{{.Artist.Image}}" alt="{{.Artist.Name}}">
+        <div class="artist-hero-info">
+            <h1>{{.Artist.Name}}</h1>
+            <div class="artist-meta">
+                <div class="artist-meta-item">
+                    <span class="meta-label">Formed</span>
+                    <span class="meta-value">{{.Artist.CreationDate}}</span>
+                </div>
+                <div class="artist-meta-item">
+                    <span class="meta-label">First Album</span>
+                    <span class="meta-value">{{.Artist.FirstAlbum}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="artist-sections">
+
+        <section class="detail-section">
+            <h3>Members</h3>
+            {{if .Artist.Members}}
+            <ul class="members-list">
+                {{range .Artist.Members}}
+                <li>{{.}}</li>
+                {{end}}
+            </ul>
+            {{else}}
+            <p class="empty-state">No member information available.</p>
+            {{end}}
+        </section>
+
+        <section class="detail-section">
+            <h3>Concert Locations</h3>
+            {{if .Locations}}
+            <ul class="locations-list">
+                {{range .Locations}}
+                <li>{{.}}</li>
+                {{end}}
+            </ul>
+            {{else}}
+            <p class="empty-state">No locations available.</p>
+            {{end}}
+        </section>
+
+        <section class="detail-section">
+            <h3>Concert Dates</h3>
+            {{if .Dates}}
+            <ul class="dates-list">
+                {{range .Dates}}
+                <li>{{.}}</li>
+                {{end}}
+            </ul>
+            {{else}}
+            <p class="empty-state">No dates available.</p>
+            {{end}}
+        </section>
+
+    </div>
+</div>
+
+{{end}}
