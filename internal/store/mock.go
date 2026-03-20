@@ -24,3 +24,15 @@ func (m *MockStore) ArtistByID(id int) (models.Artist, bool) {
 func (m *MockStore) SearchArtists(query string) []models.Artist {
 	return m.AllArtists()
 }
+func (m *MockStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
+	for _, a := range m.AllArtists() {
+		if a.ID == id {
+			return models.ArtistPageData{
+				Artist:    a,
+				Locations: []string{},
+				Dates:     []string{},
+			}, true
+		}
+	}
+	return models.ArtistPageData{}, false
+}
