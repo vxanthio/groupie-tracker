@@ -36,6 +36,15 @@ func (s *testStore) SearchArtists(query string) []models.Artist {
 	return s.artists
 }
 
+func (s *testStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
+	for _, a := range s.artists {
+		if a.ID == id {
+			return models.ArtistPageData{Artist: a, Locations: []string{}, Dates: []string{}}, true
+		}
+	}
+	return models.ArtistPageData{}, false
+}
+
 // Compile-time check: testStore satisfies store.Store.
 var _ store.Store = (*testStore)(nil)
 
