@@ -132,6 +132,7 @@ func TestArtistHandler(t *testing.T) {
 	tests := []struct {
 		name             string
 		url              string
+		pathID           string
 		artists          []models.Artist
 		tmpl             *template.Template
 		wantStatusCode   int
@@ -140,6 +141,7 @@ func TestArtistHandler(t *testing.T) {
 		{
 			name:             "valid_id_returns_200",
 			url:              "/artist/1",
+			pathID:           "1",
 			artists:          artists,
 			tmpl:             artistTmpl,
 			wantStatusCode:   http.StatusOK,
@@ -148,6 +150,7 @@ func TestArtistHandler(t *testing.T) {
 		{
 			name:             "unknown_id_returns_404",
 			url:              "/artist/99",
+			pathID:           "99",
 			artists:          artists,
 			tmpl:             artistTmpl,
 			wantStatusCode:   http.StatusNotFound,
@@ -156,6 +159,7 @@ func TestArtistHandler(t *testing.T) {
 		{
 			name:             "non_numeric_id_returns_404",
 			url:              "/artist/abc",
+			pathID:           "abc",
 			artists:          artists,
 			tmpl:             artistTmpl,
 			wantStatusCode:   http.StatusNotFound,
@@ -164,6 +168,7 @@ func TestArtistHandler(t *testing.T) {
 		{
 			name:             "template_error_returns_500",
 			url:              "/artist/1",
+			pathID:           "1",
 			artists:          artists,
 			tmpl:             brokenTemplate(),
 			wantStatusCode:   http.StatusInternalServerError,
@@ -177,6 +182,7 @@ func TestArtistHandler(t *testing.T) {
 			h := NewArtistHandler(s, tc.tmpl)
 
 			req := httptest.NewRequest(http.MethodGet, tc.url, nil)
+			req.SetPathValue("id", tc.pathID)
 			rec := httptest.NewRecorder()
 
 			h.ServeHTTP(rec, req)
