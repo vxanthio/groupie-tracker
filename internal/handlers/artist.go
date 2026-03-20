@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"groupie-tracker/internal/models"
 	"groupie-tracker/internal/store"
 )
 
@@ -33,15 +32,10 @@ func (h *ArtistHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	artist, ok := h.store.ArtistByID(id)
+	data, ok := h.store.ArtistPageDataByID(id)
 	if !ok {
 		http.NotFound(w, r)
 		return
-	}
-
-	data := models.ArtistPageData{
-		Artist: artist,
-		// Locations and Dates are populated once Vasiliki extends the Store interface.
 	}
 
 	var buf bytes.Buffer
