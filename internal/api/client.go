@@ -7,22 +7,25 @@ import (
 	"net/http"
 )
 
-type appData struct {
+type AppData struct {
 	Artists   []models.Artist
 	Locations models.LocationsResponse
 	Date      models.DatesResponse
 	Relations models.RelationResponse
 }
 
-var data appData
+var data AppData
 
-func loadData() error {
+func LoadData() error {
 	return loadDataFromURLs(
 		"https://groupietrackers.herokuapp.com/api/artists",
 		"https://groupietrackers.herokuapp.com/api/locations",
 		"https://groupietrackers.herokuapp.com/api/dates",
 		"https://groupietrackers.herokuapp.com/api/relation",
 	)
+}
+func GetData() AppData {
+	return data
 }
 
 func loadDataFromURLs(artistsURL, locationsURL, datesURL, relationsURL string) error {
