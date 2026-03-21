@@ -221,3 +221,145 @@ func TestArtistHandler(t *testing.T) {
 		})
 	}
 }
+
+// --- GET /api/search (SearchHandler) tests ---
+
+func TestSearchHandler(t *testing.T) {
+	artists := []models.Artist{
+		{ID: 1, Name: "Queen"},
+		{ID: 2, Name: "Billie Eilish"},
+	}
+
+	tests := []struct {
+		name           string
+		method         string
+		url            string
+		wantStatusCode int
+		wantInBody     string
+	}{
+		{
+			name:           "valid_query_returns_200",
+			method:         http.MethodGet,
+			url:            "/api/search?q=queen",
+			wantStatusCode: http.StatusOK,
+			wantInBody:     "Queen",
+		},
+		{
+			name:           "missing_q_returns_400",
+			method:         http.MethodGet,
+			url:            "/api/search",
+			wantStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:           "empty_q_returns_400",
+			method:         http.MethodGet,
+			url:            "/api/search?q=",
+			wantStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:           "post_method_returns_405",
+			method:         http.MethodPost,
+			url:            "/api/search?q=queen",
+			wantStatusCode: http.StatusMethodNotAllowed,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			h := &SearchHandler{Store: &testStore{artists: artists}}
+			req := httptest.NewRequest(tc.method, tc.url, nil)
+			rec := httptest.NewRecorder()
+
+			h.Search(rec, req)
+
+			if rec.Code != tc.wantStatusCode {
+				t.Errorf("status = %d, want %d", rec.Code, tc.wantStatusCode)
+			}
+			if tc.wantInBody != "" && !strings.Contains(rec.Body.String(), tc.wantInBody) {
+				t.Errorf("body does not contain %q\nbody: %s", tc.wantInBody, rec.Body.String())
+			}
+		})
+	}
+}
+
+// --- RecoveryMiddleware tests ---
+
+func TestRecoveryMiddleware(t *testing.T) {
+	tests := []struct {
+		name           string
+		handler        http.HandlerFunc
+		wantStatusCode int
+	}{
+		{
+			name: "panic_returns_500",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				panic("something went wrong")
+			},
+			wantStatusCode: http.StatusInternalServerError,
+		},
+		{
+			name: "no_panic_passes_through",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			},
+			wantStatusCode: http.StatusOK,
+		},
+	}
+
+	tmpl = template.Must(template.New("500.html").Parse(`Internal Server Error`))
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			rec := httptest.NewRecorder()
+
+			RecoveryMiddleware(tc.handler).ServeHTTP(rec, req)
+
+			if rec.Code != tc.wantStatusCode {
+				t.Errorf("status = %d, want %d", rec.Code, tc.wantStatusCode)
+			}
+		})
+	}
+}
+
+// --- NotFoundHandler / StatusInternalServerError tests ---
+
+func TestErrorHandlers(t *testing.T) {
+	tests := []struct {
+		name           string
+		templateName   string
+		templateBody   string
+		handler        http.HandlerFunc
+		wantStatusCode int
+	}{
+		{
+			name:           "not_found_returns_404",
+			templateName:   "404.html",
+			templateBody:   `Not Found`,
+			handler:        NotFoundHandler,
+			wantStatusCode: http.StatusNotFound,
+		},
+		{
+			name:           "internal_server_error_returns_500",
+			templateName:   "500.html",
+			templateBody:   `Internal Server Error`,
+			handler:        StatusInternalServerError,
+			wantStatusCode: http.StatusInternalServerError,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tmpl = template.Must(template.New(tc.templateName).Parse(tc.templateBody))
+
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			rec := httptest.NewRecorder()
+
+			tc.handler(rec, req)
+
+			if rec.Code != tc.wantStatusCode {
+				t.Errorf("status = %d, want %d", rec.Code, tc.wantStatusCode)
+			}
+		})
+	}
+}
