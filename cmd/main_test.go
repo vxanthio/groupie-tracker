@@ -1,0 +1,100 @@
+// Package main provides integration tests for route registration and server behaviour.
+package main
+
+import (
+	"html/template"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"groupie-tracker/internal/handlers"
+	"groupie-tracker/internal/models"
+	"groupie-tracker/internal/store"
+)
+
+// routeStore is a minimal store.Store used in route-level tests.
+type routeStore struct{}
+
+func (r *routeStore) AllArtists() []models.Artist {
+	return []models.Artist{
+		{ID: 1, Name: "Test Artist", Image: "http://img/1.jpg", CreationDate: 2000},
+	}
+}
+
+func (r *routeStore) ArtistByID(id int) (models.Artist, bool) {
+	if id == 1 {
+		return models.Artist{ID: 1, Name: "Test Artist"}, true
+	}
+	return models.Artist{}, false
+}
+
+func (r *routeStore) SearchArtists(query string) []models.Artist {
+	return r.AllArtists()
+}
+
+func (r *routeStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
+	if id == 1 {
+		return models.ArtistPageData{
+			Artist:    models.Artist{ID: 1, Name: "Test Artist"},
+			Locations: []string{},
+			Dates:     []string{},
+		}, true
+	}
+	return models.ArtistPageData{}, false
+}
+
+// Compile-time check: routeStore satisfies store.Store.
+var _ store.Store = (*routeStore)(nil)
+
+// buildMux constructs the application mux with minimal inline templates.
+// This mirrors what main() does but with injected store and templates —
+// no external API call, no filesystem template loading.
+func buildMux(s store.Store) *http.ServeMux {
+	homeTmpl := template.Must(template.New("base").Parse(`{{range .}}{{.Name}}{{end}}`))
+	artistTmpl := template.Must(template.New("base").Parse(`{{.Artist.Name}}`))
+
+	mux := http.NewServeMux()
+	mux.Handle("GET /", handlers.NewHomeHandler(s, homeTmpl))
+	mux.Handle("GET /artist/{id}", handlers.NewArtistHandler(s, artistTmpl))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../web/static"))))
+	return mux
+}
+
+func TestRoutes(t *testing.T) {
+	s := &routeStore{}
+	mux := buildMux(s)
+	srv := httptest.NewServer(mux)
+	defer srv.Close()
+
+	tests := []struct {
+		name     string
+		method   string
+		path     string
+		wantCode int
+	}{
+		{"home_returns_200", http.MethodGet, "/", http.StatusOK},
+		{"artist_valid_id_returns_200", http.MethodGet, "/artist/1", http.StatusOK},
+		{"artist_unknown_id_returns_404", http.MethodGet, "/artist/99", http.StatusNotFound},
+		{"artist_non_numeric_id_returns_404", http.MethodGet, "/artist/abc", http.StatusNotFound},
+		{"static_css_returns_200", http.MethodGet, "/static/css/styles.css", http.StatusOK},
+		{"unknown_route_returns_404", http.MethodGet, "/nonexistent", http.StatusNotFound},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			req, err := http.NewRequest(tc.method, srv.URL+tc.path, nil)
+			if err != nil {
+				t.Fatalf("could not build request: %v", err)
+			}
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				t.Fatalf("request failed: %v", err)
+			}
+			defer resp.Body.Close()
+
+			if resp.StatusCode != tc.wantCode {
+				t.Errorf("GET %s = %d, want %d", tc.path, resp.StatusCode, tc.wantCode)
+			}
+		})
+	}
+}
