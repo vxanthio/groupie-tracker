@@ -24,6 +24,11 @@ func NewHomeHandler(s store.Store, tmpl *template.Template) http.Handler {
 // ServeHTTP retrieves all artists from the store and renders the home template.
 // Returns 500 if template execution fails — the page is never partially written.
 func (h *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
 	artists := h.store.AllArtists()
 
 	var buf bytes.Buffer
