@@ -76,6 +76,7 @@ func TestHomeHandler(t *testing.T) {
 
 	tests := []struct {
 		name             string
+		path             string
 		artists          []models.Artist
 		tmpl             *template.Template
 		wantStatusCode   int
@@ -83,6 +84,7 @@ func TestHomeHandler(t *testing.T) {
 	}{
 		{
 			name:             "happy_path_two_artists",
+			path:             "/",
 			artists:          twoArtists,
 			tmpl:             homeTmpl,
 			wantStatusCode:   http.StatusOK,
@@ -90,13 +92,23 @@ func TestHomeHandler(t *testing.T) {
 		},
 		{
 			name:             "empty_store_returns_200",
+			path:             "/",
 			artists:          []models.Artist{},
 			tmpl:             homeTmpl,
 			wantStatusCode:   http.StatusOK,
 			wantBodyContains: []string{},
 		},
 		{
+			name:             "unknown_path_returns_404",
+			path:             "/nonexistent",
+			artists:          twoArtists,
+			tmpl:             homeTmpl,
+			wantStatusCode:   http.StatusNotFound,
+			wantBodyContains: []string{},
+		},
+		{
 			name:             "template_error_returns_500",
+			path:             "/",
 			artists:          twoArtists,
 			tmpl:             brokenTemplate(),
 			wantStatusCode:   http.StatusInternalServerError,
@@ -109,7 +121,7 @@ func TestHomeHandler(t *testing.T) {
 			s := &testStore{artists: tc.artists}
 			h := NewHomeHandler(s, tc.tmpl)
 
-			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req := httptest.NewRequest(http.MethodGet, tc.path, nil)
 			rec := httptest.NewRecorder()
 
 			h.ServeHTTP(rec, req)
