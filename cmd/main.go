@@ -40,10 +40,8 @@ func main() {
 	))
 
 	mux := http.NewServeMux()
-
 	mux.Handle("GET /", handlers.NewHomeHandler(s, homeTmpl))
 	mux.Handle("GET /artist/{id}", handlers.NewArtistHandler(s, artistTmpl))
-
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 
 	log.Printf("server listening on %s", addr)
