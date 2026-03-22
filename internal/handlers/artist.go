@@ -39,7 +39,7 @@ func (h *ArtistHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var buf bytes.Buffer
-	if err := h.tmpl.Execute(&buf, data); err != nil {
+	if err := h.tmpl.ExecuteTemplate(&buf, "base", data); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}

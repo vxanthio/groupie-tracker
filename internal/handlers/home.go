@@ -32,7 +32,7 @@ func (h *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	artists := h.store.AllArtists()
 
 	var buf bytes.Buffer
-	if err := h.tmpl.Execute(&buf, artists); err != nil {
+	if err := h.tmpl.ExecuteTemplate(&buf, "base", artists); err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
