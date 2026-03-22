@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"groupie-tracker/internal/models"
 	"net/http"
+	"time"
 )
 
 type AppData struct {
@@ -28,8 +29,10 @@ func GetData() AppData {
 	return data
 }
 
+var httpClient = &http.Client{Timeout: 10 * time.Second}
+
 func loadDataFromURLs(artistsURL, locationsURL, datesURL, relationsURL string) error {
-	respArt, err := http.Get(artistsURL)
+	respArt, err := httpClient.Get(artistsURL)
 	if err != nil {
 		return fmt.Errorf("artist fetch failed: %w", err)
 	}
@@ -37,7 +40,7 @@ func loadDataFromURLs(artistsURL, locationsURL, datesURL, relationsURL string) e
 	if err = json.NewDecoder(respArt.Body).Decode(&data.Artists); err != nil {
 		return fmt.Errorf("decoding failed: %w", err)
 	}
-	respLoc, err := http.Get(locationsURL)
+	respLoc, err := httpClient.Get(locationsURL)
 	if err != nil {
 		return fmt.Errorf("location fetch failed: %w", err)
 	}
@@ -45,7 +48,7 @@ func loadDataFromURLs(artistsURL, locationsURL, datesURL, relationsURL string) e
 	if err = json.NewDecoder(respLoc.Body).Decode(&data.Locations); err != nil {
 		return fmt.Errorf("location decode failed: %w", err)
 	}
-	respDate, err := http.Get(datesURL)
+	respDate, err := httpClient.Get(datesURL)
 	if err != nil {
 		return fmt.Errorf("date fetch failed: %w", err)
 	}
@@ -53,7 +56,7 @@ func loadDataFromURLs(artistsURL, locationsURL, datesURL, relationsURL string) e
 	if err = json.NewDecoder(respDate.Body).Decode(&data.Date); err != nil {
 		return fmt.Errorf("date decode failed: %w", err)
 	}
-	respRel, err := http.Get(relationsURL)
+	respRel, err := httpClient.Get(relationsURL)
 	if err != nil {
 		return fmt.Errorf("relations fetch failed: %w", err)
 	}
