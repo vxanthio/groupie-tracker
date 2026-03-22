@@ -285,6 +285,8 @@ func TestSearchHandler(t *testing.T) {
 // --- RecoveryMiddleware tests ---
 
 func TestRecoveryMiddleware(t *testing.T) {
+	errTmpl := template.Must(template.New("500.html").Parse(`Internal Server Error`))
+
 	tests := []struct {
 		name           string
 		handler        http.HandlerFunc
@@ -306,14 +308,12 @@ func TestRecoveryMiddleware(t *testing.T) {
 		},
 	}
 
-	tmpl = template.Must(template.New("500.html").Parse(`Internal Server Error`))
-
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
 
-			RecoveryMiddleware(tc.handler).ServeHTTP(rec, req)
+			RecoveryMiddleware(errTmpl, tc.handler).ServeHTTP(rec, req)
 
 			if rec.Code != tc.wantStatusCode {
 				t.Errorf("status = %d, want %d", rec.Code, tc.wantStatusCode)
@@ -329,7 +329,7 @@ func TestErrorHandlers(t *testing.T) {
 		name           string
 		templateName   string
 		templateBody   string
-		handler        http.HandlerFunc
+		handler        func(*template.Template) http.HandlerFunc
 		wantStatusCode int
 	}{
 		{
@@ -350,12 +350,12 @@ func TestErrorHandlers(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tmpl = template.Must(template.New(tc.templateName).Parse(tc.templateBody))
+			tmpl := template.Must(template.New(tc.templateName).Parse(tc.templateBody))
 
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
 
-			tc.handler(rec, req)
+			tc.handler(tmpl)(rec, req)
 
 			if rec.Code != tc.wantStatusCode {
 				t.Errorf("status = %d, want %d", rec.Code, tc.wantStatusCode)

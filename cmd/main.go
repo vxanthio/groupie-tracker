@@ -38,13 +38,11 @@ func main() {
 		"web/templates/base.html",
 		"web/templates/artist.html",
 	))
-	if err := handlers.InitTemplates(); err != nil {
-		log.Fatalf("failed to load templates: %v", err)
-	}
+	errorTmpl := template.Must(template.ParseGlob("web/templates/*.html"))
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
-			handlers.NotFoundHandler(w, r)
+			handlers.NotFoundHandler(errorTmpl)(w, r)
 			return
 		}
 		handlers.NewHomeHandler(s, homeTmpl).ServeHTTP(w, r)
@@ -55,7 +53,7 @@ func main() {
 	mux.HandleFunc("GET /api/search", searchHandler.Search)
 
 	log.Printf("server listening on %s", addr)
-	if err := http.ListenAndServe(addr, handlers.RecoveryMiddleware(mux)); err != nil {
+	if err := http.ListenAndServe(addr, handlers.RecoveryMiddleware(errorTmpl, mux)); err != nil {
 		log.Fatalf("server error: %v", err)
 	}
 }

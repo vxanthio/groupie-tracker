@@ -52,11 +52,20 @@ var _ store.Store = (*routeStore)(nil)
 func buildMux(s store.Store) *http.ServeMux {
 	homeTmpl := template.Must(template.New("base").Parse(`{{range .}}{{.Name}}{{end}}`))
 	artistTmpl := template.Must(template.New("base").Parse(`{{.Artist.Name}}`))
+	errorTmpl := template.Must(template.New("404.html").Parse(`Not Found`))
 
 	mux := http.NewServeMux()
-	mux.Handle("GET /", handlers.NewHomeHandler(s, homeTmpl))
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			handlers.NotFoundHandler(errorTmpl)(w, r)
+			return
+		}
+		handlers.NewHomeHandler(s, homeTmpl).ServeHTTP(w, r)
+	})
 	mux.Handle("GET /artist/{id}", handlers.NewArtistHandler(s, artistTmpl))
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../web/static"))))
+	searchHandler := &handlers.SearchHandler{Store: s}
+	mux.HandleFunc("GET /api/search", searchHandler.Search)
 	return mux
 }
 
@@ -78,6 +87,8 @@ func TestRoutes(t *testing.T) {
 		{"artist_non_numeric_id_returns_404", http.MethodGet, "/artist/abc", http.StatusNotFound},
 		{"static_css_returns_200", http.MethodGet, "/static/css/styles.css", http.StatusOK},
 		{"unknown_route_returns_404", http.MethodGet, "/nonexistent", http.StatusNotFound},
+		{"search_with_query_returns_200", http.MethodGet, "/api/search?q=test", http.StatusOK},
+		{"search_missing_q_returns_400", http.MethodGet, "/api/search", http.StatusBadRequest},
 	}
 
 	for _, tc := range tests {
