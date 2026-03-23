@@ -21,14 +21,14 @@
 
 :root {
     /* Colors */
-    --color-bg:          #0f0f0f;
-    --color-surface:     #1a1a1a;
-    --color-surface-2:   #242424;
-    --color-border:      #2e2e2e;
-    --color-primary:     #e8ff47;
+    --color-bg:          #111111;
+    --color-surface:     #1e1e1e;
+    --color-surface-2:   #2a2a2a;
+    --color-border:      #333333;
+    --color-primary:     #f48fb1;
     --color-text:        #f0f0f0;
     --color-text-muted:  #888888;
-    --color-error:       #ff4d4d;
+    --color-error:       #ff6b6b;
 
     /* Spacing */
     --space-xs:  0.25rem;
@@ -234,7 +234,7 @@ footer p {
 
 .search-bar:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(232, 255, 71, 0.1);
+    box-shadow: 0 0 0 3px rgba(244, 143, 177, 0.15);
 }
 
 
