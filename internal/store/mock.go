@@ -22,7 +22,13 @@ func (m *MockStore) ArtistByID(id int) (models.Artist, bool) {
 	return models.Artist{}, false
 }
 func (m *MockStore) SearchArtists(query string) []models.Artist {
-	return m.AllArtists()
+	var results []models.Artist
+	for _, a := range m.AllArtists() {
+		if matchesQuery(a, query) {
+			results = append(results, a)
+		}
+	}
+	return results
 }
 func (m *MockStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
 	for _, a := range m.AllArtists() {

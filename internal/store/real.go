@@ -1,6 +1,10 @@
 package store
 
-import "groupie-tracker/internal/models"
+import (
+	"groupie-tracker/internal/models"
+	"strconv"
+	"strings"
+)
 
 type RealStore struct {
 	Artists   []models.Artist
@@ -21,8 +25,34 @@ func (r *RealStore) ArtistByID(id int) (models.Artist, bool) {
 	return models.Artist{}, false
 }
 func (r *RealStore) SearchArtists(query string) []models.Artist {
-	return r.AllArtists()
+	var result []models.Artist
+	for _, a := range r.AllArtists() {
+		if matchesQuery(a, query) {
+			result = append(result, a)
+		}
+	}
+	return result
 }
+func matchesQuery(a models.Artist, query string) bool {
+	q := strings.ToLower(query)
+	if strings.Contains(strings.ToLower(a.Name), q) {
+		return true
+	}
+	for _, member := range a.Members {
+		if strings.Contains(strings.ToLower(member), q) {
+			return true
+		}
+	}
+	if strings.Contains(strings.ToLower(strconv.Itoa(a.CreationDate)), q) {
+		return true
+	}
+	if strings.Contains(strings.ToLower(a.FirstAlbum), q) {
+		return true
+	}
+
+	return false
+}
+
 func (r *RealStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
 	for _, a := range r.AllArtists() {
 		if a.ID == id {
