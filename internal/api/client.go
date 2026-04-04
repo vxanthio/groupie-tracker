@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+// AppData holds the complete dataset fetched from the external API at startup.
+// It is populated once by LoadData and then read-only for the lifetime of the server.
 type AppData struct {
 	Artists   []models.Artist
 	Locations models.LocationsResponse
