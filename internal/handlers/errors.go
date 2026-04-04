@@ -1,7 +1,3 @@
-// Package handlers implements all HTTP handlers and middleware for the
-// groupie-tracker web server. Each handler receives its dependencies —
-// store and template — at construction time via injection, keeping
-// handlers stateless and independently testable.
 package handlers
 
 import (
