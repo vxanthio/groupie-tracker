@@ -1,7 +1,14 @@
 'use strict';
 
-// debounce returns a function that delays invoking fn until after delay ms
-// have elapsed since the last time it was invoked.
+/**
+ * debounce returns a function that delays invoking fn until after delay ms
+ * have elapsed since the last invocation. Repeated calls within the delay
+ * window reset the timer, so fn is only called once after the burst stops.
+ *
+ * @param {Function} fn - the function to debounce
+ * @param {number} delay - delay in milliseconds
+ * @returns {Function} debounced version of fn that forwards all arguments
+ */
 function debounce(fn, delay) {
     let timer;
     return function () {
@@ -13,9 +20,13 @@ function debounce(fn, delay) {
     };
 }
 
-// renderCards returns an HTML string for the given array of artist objects.
-// Each artist must have: id, name, image, creationDate.
-// Returns an empty string for an empty array.
+/**
+ * renderCards builds an HTML string of artist card links from an array of
+ * artist objects. Each object must have id, name, image, and creationDate.
+ *
+ * @param {Array<{id: number, name: string, image: string, creationDate: number}>} artists
+ * @returns {string} HTML string of artist cards, or an empty string if the array is empty
+ */
 function renderCards(artists) {
     if (!artists || artists.length === 0) {
         return '';
