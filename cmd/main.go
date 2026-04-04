@@ -13,8 +13,11 @@ import (
 	"groupie-tracker/internal/store"
 )
 
+// addr is the TCP address the HTTP server listens on.
 const addr = ":8080"
 
+// main loads all data from the external API, wires up the dependency graph
+// (store, templates, handlers, middleware), and starts the HTTP server.
 func main() {
 	// Load all data from the external API once at startup.
 	if err := api.LoadData(); err != nil {
