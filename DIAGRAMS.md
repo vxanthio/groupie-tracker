@@ -22,7 +22,7 @@ flowchart TD
 
     B -->|render| L[home.html]
     C -->|render| M[artist.html]
-    D -->|"JSON response"| A
+    D -->|JSON| A
 
     L -->|extends| N[base.html]
     M -->|extends| N
