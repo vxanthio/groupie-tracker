@@ -19,7 +19,7 @@ import (
 type AppData struct {
 	Artists   []models.Artist
 	Locations models.LocationsResponse
-	Date      models.DatesResponse
+	Dates     models.DatesResponse
 	Relations models.RelationResponse
 }
 
@@ -76,7 +76,7 @@ func loadDataFromURLs(artistsURL, locationsURL, datesURL, relationsURL string) e
 		return fmt.Errorf("date fetch failed: %w", err)
 	}
 	defer respDate.Body.Close()
-	if err = json.NewDecoder(respDate.Body).Decode(&data.Date); err != nil {
+	if err = json.NewDecoder(respDate.Body).Decode(&data.Dates); err != nil {
 		return fmt.Errorf("date decode failed: %w", err)
 	}
 	respRel, err := httpClient.Get(relationsURL)

@@ -12,7 +12,7 @@ import (
 type RealStore struct {
 	Artists   []models.Artist
 	Locations models.LocationsResponse
-	Data      models.DatesResponse
+	Dates     models.DatesResponse
 	Relations models.RelationResponse
 }
 
@@ -80,7 +80,7 @@ func (r *RealStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
 				}
 			}
 			var dates []string
-			for _, d := range r.Data.Index {
+			for _, d := range r.Dates.Index {
 				if d.ID == id {
 					dates = d.Dates
 				}

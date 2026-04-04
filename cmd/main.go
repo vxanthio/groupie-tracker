@@ -28,7 +28,7 @@ func main() {
 	s := &store.RealStore{
 		Artists:   d.Artists,
 		Locations: d.Locations,
-		Data:      d.Date,
+		Dates:     d.Dates,
 		Relations: d.Relations,
 	}
 	log.Printf("Data loaded: %d artists", len(d.Artists))
