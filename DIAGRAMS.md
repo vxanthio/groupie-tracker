@@ -5,9 +5,9 @@
 ```mermaid
 flowchart TD
     A([Browser]) -->|GET /| B[HomeHandler]
-    A -->|GET /artist/id| C[ArtistHandler]
-    A -->|GET /api/search?q=| D[SearchHandler]
-    A -->|GET /static/...| E[FileServer]
+    A -->|"GET /artist/{id}"| C[ArtistHandler]
+    A -->|"GET /api/search?q="| D[SearchHandler]
+    A -->|"GET /static/..."| E[FileServer]
 
     B --> F[store.AllArtists]
     C --> G[store.ArtistPageDataByID]
@@ -22,7 +22,7 @@ flowchart TD
 
     B -->|render| L[home.html]
     C -->|render| M[artist.html]
-    D -->|JSON response| A
+    D -->|"JSON response"| A
 
     L -->|extends| N[base.html]
     M -->|extends| N
