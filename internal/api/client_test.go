@@ -42,8 +42,8 @@ func TestLoadData_Success(t *testing.T) {
 	if len(data.Locations.Index) != 1 {
 		t.Errorf("unexpected locations: %+v", data.Locations)
 	}
-	if len(data.Date.Index) != 1 {
-		t.Errorf("unexpected dates: %+v", data.Date)
+	if len(data.Dates.Index) != 1 {
+		t.Errorf("unexpected dates: %+v", data.Dates)
 	}
 	if len(data.Relations.Index) != 1 {
 		t.Errorf("unexpected relations: %+v", data.Relations)
