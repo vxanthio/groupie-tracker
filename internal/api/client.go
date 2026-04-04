@@ -61,7 +61,7 @@ func loadDataFromURLs(artistsURL, locationsURL, datesURL, relationsURL string) e
 	}
 	defer respArt.Body.Close()
 	if err = json.NewDecoder(respArt.Body).Decode(&data.Artists); err != nil {
-		return fmt.Errorf("decoding failed: %w", err)
+		return fmt.Errorf("artist decode failed: %w", err)
 	}
 	respLoc, err := httpClient.Get(locationsURL)
 	if err != nil {
