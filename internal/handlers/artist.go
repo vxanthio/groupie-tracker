@@ -9,21 +9,26 @@ import (
 	"groupie-tracker/internal/store"
 )
 
-// ArtistHandler handles GET /artist/{id} requests by rendering the artist detail page.
+// ArtistHandler handles GET /artist/{id} requests by looking up a single artist
+// and rendering the artist detail page. The store and template are injected at
+// construction time so the handler is stateless and safe for concurrent use.
 type ArtistHandler struct {
 	store store.Store
 	tmpl  *template.Template
 }
 
 // NewArtistHandler constructs an ArtistHandler with the given store and template.
-// The template is parsed once at construction time and reused across requests.
+// The template is parsed once at construction time and reused across all requests,
+// avoiding repeated filesystem reads on every page load.
 func NewArtistHandler(s store.Store, tmpl *template.Template) http.Handler {
 	return &ArtistHandler{store: s, tmpl: tmpl}
 }
 
-// ServeHTTP parses the artist ID from the URL, looks up the artist, and renders
-// the detail template. Returns 404 for unknown or non-numeric IDs, 500 on
-// template execution failure.
+// ServeHTTP extracts the artist ID from the URL path, validates it is a positive
+// integer, and retrieves the matching ArtistPageData from the store. It renders
+// the result into a buffer before writing to the response so that a template
+// execution error does not result in a partially written 200 response.
+// Returns 404 for non-numeric or unknown IDs, 500 if template execution fails.
 func (h *ArtistHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)

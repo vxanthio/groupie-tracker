@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+// RealStore is the production implementation of the Store interface.
+// It holds all data loaded from the external API at startup and serves it
+// directly from memory on every request, avoiding repeated network calls.
 type RealStore struct {
 	Artists   []models.Artist
 	Locations models.LocationsResponse
@@ -13,9 +16,13 @@ type RealStore struct {
 	Relations models.RelationResponse
 }
 
+// AllArtists returns the full list of artists held in memory.
 func (r *RealStore) AllArtists() []models.Artist {
 	return r.Artists
 }
+
+// ArtistByID performs a linear scan over all artists and returns the one
+// matching the given ID. Returns false if no match is found.
 func (r *RealStore) ArtistByID(id int) (models.Artist, bool) {
 	for _, a := range r.AllArtists() {
 		if a.ID == id {
@@ -24,6 +31,9 @@ func (r *RealStore) ArtistByID(id int) (models.Artist, bool) {
 	}
 	return models.Artist{}, false
 }
+
+// SearchArtists filters the artist list using matchesQuery and returns all
+// artists that contain the query string in any searchable field.
 func (r *RealStore) SearchArtists(query string) []models.Artist {
 	var result []models.Artist
 	for _, a := range r.AllArtists() {
@@ -33,6 +43,10 @@ func (r *RealStore) SearchArtists(query string) []models.Artist {
 	}
 	return result
 }
+
+// matchesQuery performs a case-insensitive substring search across the artist's
+// name, individual member names, creation date, and first album date.
+// It returns true as soon as any field matches, without checking the rest.
 func matchesQuery(a models.Artist, query string) bool {
 	q := strings.ToLower(query)
 	if strings.Contains(strings.ToLower(a.Name), q) {
@@ -53,6 +67,9 @@ func matchesQuery(a models.Artist, query string) bool {
 	return false
 }
 
+// ArtistPageDataByID looks up an artist by ID and assembles the ArtistPageData
+// view model by joining the matching locations and dates from their respective
+// index slices. Returns false if no artist with the given ID exists.
 func (r *RealStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
 	for _, a := range r.AllArtists() {
 		if a.ID == id {
