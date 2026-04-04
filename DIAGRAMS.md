@@ -22,7 +22,6 @@ flowchart TD
 
     B -->|render| L[home.html]
     C -->|render| M[artist.html]
-    D -->|JSON| A
 
     L -->|extends| N[base.html]
     M -->|extends| N
