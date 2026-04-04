@@ -1,4 +1,3 @@
-// Package main provides integration tests for route registration and server behaviour.
 package main
 
 import (
@@ -12,7 +11,6 @@ import (
 	"groupie-tracker/internal/store"
 )
 
-// routeStore is a minimal store.Store used in route-level tests.
 type routeStore struct{}
 
 func (r *routeStore) AllArtists() []models.Artist {
@@ -46,9 +44,6 @@ func (r *routeStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
 // Compile-time check: routeStore satisfies store.Store.
 var _ store.Store = (*routeStore)(nil)
 
-// buildMux constructs the application mux with minimal inline templates.
-// This mirrors what main() does but with injected store and templates —
-// no external API call, no filesystem template loading.
 func buildMux(s store.Store) *http.ServeMux {
 	homeTmpl := template.Must(template.New("base").Parse(`{{range .}}{{.Name}}{{end}}`))
 	artistTmpl := template.Must(template.New("base").Parse(`{{.Artist.Name}}`))

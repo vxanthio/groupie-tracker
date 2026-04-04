@@ -1,4 +1,3 @@
-// Package handlers provides tests for all HTTP request handlers.
 package handlers
 
 import (
@@ -12,9 +11,6 @@ import (
 	"groupie-tracker/internal/store"
 )
 
-// --- Mock store for handler tests ---
-
-// testStore is a simple store.Store implementation for use in handler tests.
 type testStore struct {
 	artists []models.Artist
 }
@@ -48,22 +44,15 @@ func (s *testStore) ArtistPageDataByID(id int) (models.ArtistPageData, bool) {
 // Compile-time check: testStore satisfies store.Store.
 var _ store.Store = (*testStore)(nil)
 
-// --- Template helpers for tests ---
-
-// mustParseTemplate parses a template string and panics on error.
-// Only used in test setup — panics are acceptable there.
 func mustParseTemplate(src string) *template.Template {
 	return template.Must(template.New("base").Parse(src))
 }
 
-// brokenTemplate returns a template that always fails on execution.
 func brokenTemplate() *template.Template {
 	// Calling a nil value forces an execution error without panicking the handler.
 	tmpl, _ := template.New("base").Parse(`{{call .}}`)
 	return tmpl
 }
-
-// --- GET / (HomeHandler) tests ---
 
 func TestHomeHandler(t *testing.T) {
 	twoArtists := []models.Artist{
@@ -71,7 +60,6 @@ func TestHomeHandler(t *testing.T) {
 		{ID: 2, Name: "Queen", Image: "http://img/2.jpg", CreationDate: 1970},
 	}
 
-	// Minimal template that renders artist names — mirrors what home.html does.
 	homeTmpl := mustParseTemplate(`{{range .}}{{.Name}}{{end}}`)
 
 	tests := []struct {
@@ -140,14 +128,11 @@ func TestHomeHandler(t *testing.T) {
 	}
 }
 
-// --- GET /artist/{id} (ArtistHandler) tests ---
-
 func TestArtistHandler(t *testing.T) {
 	artists := []models.Artist{
 		{ID: 1, Name: "Foo Fighters", Image: "http://img/1.jpg", CreationDate: 1994, FirstAlbum: "04-07-1995"},
 	}
 
-	// Minimal template that renders the artist name from ArtistPageData.
 	artistTmpl := mustParseTemplate(`{{.Artist.Name}}`)
 
 	tests := []struct {
@@ -222,8 +207,6 @@ func TestArtistHandler(t *testing.T) {
 	}
 }
 
-// --- GET /api/search (SearchHandler) tests ---
-
 func TestSearchHandler(t *testing.T) {
 	artists := []models.Artist{
 		{ID: 1, Name: "Queen"},
@@ -282,8 +265,6 @@ func TestSearchHandler(t *testing.T) {
 	}
 }
 
-// --- RecoveryMiddleware tests ---
-
 func TestRecoveryMiddleware(t *testing.T) {
 	errTmpl := template.Must(template.New("500.html").Parse(`Internal Server Error`))
 
@@ -321,8 +302,6 @@ func TestRecoveryMiddleware(t *testing.T) {
 		})
 	}
 }
-
-// --- NotFoundHandler / StatusInternalServerError tests ---
 
 func TestErrorHandlers(t *testing.T) {
 	tests := []struct {
